@@ -13,6 +13,7 @@ commands:
           command: |
             aws cloudformation delete-stack \
             --stack-name udapeople-backend-<<parameters.workflow_id>>
+            aws s3 rm s3://udapeople-<<parameters.workflow_id>> --recursive
             aws cloudformation delete-stack \
             --stack-name udapeople-frontend-<<parameters.workflow_id>>
 
@@ -335,13 +336,44 @@ jobs:
             echo "${BACKEND_IP}"
             export API_URL="http://${BACKEND_IP}:3030"
             echo "${API_URL}"
-            if curl "${API_URL}/api/status" | grep "ok"
+            if curl "${API_URL}/api/status" | grep "notok"
             then
               return 0
             else
               return 1
             fi
 
+      - destroy-environment:
+          workflow_id: ${CIRCLE_WORKFLOW_ID:0:7}
+      - revert-migrations:
+          workflow_id: ${CIRCLE_WORKFLOW_ID:0:7}
+
+  cloudfront-update:
+    docker:
+      - image: circleci/node:13.8.0
+    steps:
+      - checkout
+      - run:
+          name: Install dependencies
+          command: |
+            sudo apt install -y tar gzip curl
+            curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+            unzip -qq awscliv2.zip
+            sudo ./aws/install
+      - run:
+          name: Update cloudfront distribution
+          command: |
+            export OldWorkflowID=$(aws cloudformation list-exports --query "Exports[?Name=='WorkflowID'].Value" --output text)
+            curl --insecure https://kvdb.io/UpSvCVKsMipzyF5tpkxdPQ/OldWorkflowID -d "${OldWorkflowID}"
+
+            aws cloudformation deploy \
+            --template-file .circleci/files/cloudfront.yml \
+            --stack-name udapeople-cloudfront \
+            --parameter-overrides WorkflowID="${CIRCLE_WORKFLOW_ID:0:7}" \
+            --tags project=udapeople
+
+            echo OldWorkflowID $OldWorkflowID
+            echo CIRCLE_WORKFLOW_ID "${CIRCLE_WORKFLOW_ID:0:7}"
       - destroy-environment:
           workflow_id: ${CIRCLE_WORKFLOW_ID:0:7}
       - revert-migrations:
@@ -375,3 +407,5 @@ workflows:
           requires: [run-migrations]
       - smoke-test:
           requires: [deploy-backend, deploy-frontend]
+      - cloudfront-update:
+          requires: [smoke-test]
