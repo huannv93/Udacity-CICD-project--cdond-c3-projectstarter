@@ -365,8 +365,10 @@ jobs:
           command: |
             export OldWorkflowID=$(aws cloudformation list-exports --query "Exports[?Name=='WorkflowID'].Value" --output text)
             curl --insecure https://kvdb.io/UpSvCVKsMipzyF5tpkxdPQ/OldWorkflowID -d "${OldWorkflowID}"
-            export BucketWebsiteEndpoint=$(aws cloudformation list-exports --query "Exports[?Name=='BucketWebsiteEndpoint'].Value" --output text)
 
+            export BucketWebsiteEndpoint=$(aws cloudformation list-exports --query "Exports[?Name=='BucketWebsiteEndpoint-${CIRCLE_WORKFLOW_ID:0:7}'].Value" --output text)
+            echo $BucketWebsiteEndpoint
+            
             aws cloudformation deploy \
             --template-file .circleci/files/cloudfront.yml \
             --stack-name udapeople-cloudfront \
@@ -375,7 +377,7 @@ jobs:
 
             echo OldWorkflowID $OldWorkflowID
             echo CIRCLE_WORKFLOW_ID "${CIRCLE_WORKFLOW_ID:0:7}"
-            echo $BucketWebsiteEndpoint
+            
       - destroy-environment:
           workflow_id: ${CIRCLE_WORKFLOW_ID:0:7}
       - revert-migrations:
