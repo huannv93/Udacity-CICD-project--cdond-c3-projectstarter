@@ -25,6 +25,9 @@ Resources:
       # OwnershipControls:
       #   Rules:
       #     - ObjectOwnership: BucketOwnerPreferred
+      PublicAccessBlockConfiguration:
+        BlockPublicPolicy: false
+        RestrictPublicBuckets: false
   
   WebsiteBucketPolicy:
     Type: AWS::S3::BucketPolicy
