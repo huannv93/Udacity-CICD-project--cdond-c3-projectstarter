@@ -11,20 +11,20 @@ Resources:
     Type: AWS::S3::Bucket
     Properties:
       BucketName: !Sub "udapeople-${ID}"
-      AccessControl: LogDeliveryWrite
-      VersioningConfiguration:
-        Status: Enabled
+      # AccessControl: LogDeliveryWrite
+      # VersioningConfiguration:
+      #   Status: Enabled
       
       WebsiteConfiguration:
         IndexDocument: index.html
         ErrorDocument: 404.html
-      BucketEncryption:
-        ServerSideEncryptionConfiguration:
-          - ServerSideEncryptionByDefault:
-              SSEAlgorithm: AES256
-      OwnershipControls:
-        Rules:
-          - ObjectOwnership: BucketOwnerPreferred
+      # BucketEncryption:
+      #   ServerSideEncryptionConfiguration:
+      #     - ServerSideEncryptionByDefault:
+      #         SSEAlgorithm: AES256
+      # OwnershipControls:
+      #   Rules:
+      #     - ObjectOwnership: BucketOwnerPreferred
   
   WebsiteBucketPolicy:
     Type: AWS::S3::BucketPolicy
