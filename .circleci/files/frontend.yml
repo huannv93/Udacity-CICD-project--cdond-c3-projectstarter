@@ -24,7 +24,7 @@ Resources:
               SSEAlgorithm: AES256
       OwnershipControls:
         Rules:
-          - ObjectOwnership: ObjectWriter
+          - ObjectOwnership: BucketOwnerPreferred
   
   WebsiteBucketPolicy:
     Type: AWS::S3::BucketPolicy
